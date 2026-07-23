@@ -1,0 +1,4 @@
+interface:
+  display_name: "Notion 作文老師"
+  short_description: "在 Notion 自動出題、批改並鼓勵國小高年級學生"
+  default_prompt: "Use $notion-composition-teacher to 出一篇新的國小高年級作文題目。"
