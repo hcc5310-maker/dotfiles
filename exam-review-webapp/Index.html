@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<style>
+  :root { --ink:#1F2937; --muted:#4B5563; --line:#E5E7EB; --ground:#F5F6F8; --accent:#1D4ED8; --accent-soft:#EFF4FF; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif; font-size: 16px; line-height: 1.6; }
+  header { background: #fff; border-bottom: 1px solid var(--line); }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 20px; }
+  .top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 0; }
+  .school { font-size: 13px; color: var(--muted); display: block; }
+  .title { font-size: 22px; font-weight: 700; }
+  nav { display: flex; gap: 8px; }
+  nav button { min-height: 44px; padding: 0 16px; border: none; background: none; font: inherit; color: var(--muted); border-bottom: 3px solid transparent; cursor: pointer; }
+  nav button[aria-current="page"] { color: var(--accent); font-weight: 700; border-bottom-color: var(--accent); }
+  main { padding-top: 28px; padding-bottom: 64px; }
+  h1 { margin: 0; font-size: 24px; }
+  h2 { margin: 0 0 12px; font-size: 18px; }
+  .row-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 16px; }
+  .hint { font-size: 14px; color: var(--muted); }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px 24px; margin-bottom: 20px; }
+  .list { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .item { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 16px 20px; border-bottom: 1px solid #F0F1F3; }
+  .item:last-child { border-bottom: none; }
+  .item-main { flex: 999 1 300px; min-width: 0; }
+  .item-name { font-weight: 500; font-size: 17px; overflow-wrap: anywhere; }
+  .item-side { flex: 0 0 200px; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; text-align: right; }
+  .badge { padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 500; white-space: nowrap; }
+  .b-done { background: #E7F5EC; color: #166534; }
+  .b-queue { background: #EEF2FF; color: #3730A3; }
+  .b-redo { background: #FFF1E6; color: #9A3412; }
+  .eta-left { font-weight: 700; }
+  .eta-at { font-size: 13px; color: var(--muted); }
+  .btn { min-height: 44px; padding: 0 18px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font: inherit; font-size: 15px; font-weight: 500; cursor: pointer; }
+  .btn:disabled { background: #9CA3AF; cursor: wait; }
+  .btn-ghost { background: #fff; color: var(--accent); border: 1px solid #C7CCD4; }
+  .btn-big { min-height: 48px; padding: 0 28px; font-size: 17px; font-weight: 700; }
+  .link { background: none; border: none; color: var(--accent); font: inherit; font-size: 15px; min-height: 44px; padding: 0 4px; cursor: pointer; }
+  .empty { padding: 32px 20px; text-align: center; color: var(--muted); }
+  .types { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .type { display: block; position: relative; min-height: 88px; padding: 14px 16px; border: 2px solid var(--line); border-radius: 10px; cursor: pointer; background: #fff; }
+  .type input { position: absolute; opacity: 0; }
+  .type:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .type:has(input:focus-visible) { outline: 3px solid #93C5FD; outline-offset: 2px; }
+  .type-title { font-size: 17px; font-weight: 700; display: flex; justify-content: space-between; }
+  .type-title .mark { font-size: 14px; color: var(--accent); visibility: hidden; }
+  .type:has(input:checked) .mark { visibility: visible; }
+  .type-desc { font-size: 14px; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  label.field { display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 500; margin-bottom: 16px; }
+  .field small { font-weight: 400; color: var(--muted); }
+  select, input[type=text], textarea { font: inherit; min-height: 44px; padding: 8px 10px; border: 1px solid #C7CCD4; border-radius: 8px; background: #fff; }
+  input[type=file] { padding: 12px; border: 2px dashed #C7CCD4; border-radius: 8px; background: #FAFBFC; font: inherit; }
+  textarea { resize: vertical; }
+  .preview { background: #F3F4F6; border-radius: 8px; padding: 12px 14px; font-size: 14px; overflow-wrap: anywhere; }
+  .note { border-radius: 10px; padding: 14px 18px; margin-bottom: 16px; }
+  .n-info { background: var(--accent-soft); border: 1px solid #C3D3F7; color: #1E3A8A; }
+  .n-ok { background: #ECFDF3; border: 1px solid #A7E3BF; color: #14532D; }
+  .n-warn { background: #FFF7ED; border: 1px solid #F5C99B; color: #7C2D12; }
+  .n-err { background: #FEF2F2; border: 1px solid #F5B5B5; color: #991B1B; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+  .doc-frame { width: 100%; border: none; min-height: 400px; display: block; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap top">
+    <div><span class="school">照東國小</span><span class="title">定期評量審題平台</span></div>
+    <span id="who" class="hint"></span>
+  </div>
+  <nav class="wrap" aria-label="主選單">
+    <button type="button" id="tab-list" aria-current="page">我的考卷</button>
+    <button type="button" id="tab-upload" aria-current="false">上傳考卷</button>
+  </nav>
+</header>
+
+<main class="wrap">
+  <div id="global-msg" class="note" hidden role="status"></div>
+
+  <!-- 我的考卷 -->
+  <section id="view-list">
+    <div class="row-head">
+      <h1>我的考卷</h1>
+      <span class="hint">考試日 9:03–15:03 每小時審一次；平日（週一至五）16:03 審一次；每次約 15 分鐘完成</span>
+    </div>
+    <div id="list" class="list"><div class="empty">讀取中…</div></div>
+    <p class="hint">檔案會在最後一次審題後第 3 個上課日自動清除，需要保留請先下載建議。</p>
+  </section>
+
+  <!-- 上傳考卷 -->
+  <section id="view-upload" hidden>
+    <h1 id="up-title" style="margin-bottom:20px">上傳考卷</h1>
+    <div id="redo-note" class="note n-warn" hidden></div>
+
+    <div class="card" id="type-card">
+      <h2>1. 你需要什麼協助？</h2>
+      <div class="types" role="radiogroup" aria-label="協助類型">
+        <label class="type"><input type="radio" name="kind" value="whole" checked>
+          <span class="type-title">整份考卷審題<span class="mark">已選</span></span>
+          <span class="type-desc">檢查整份考卷，給審題建議</span></label>
+        <label class="type"><input type="radio" name="kind" value="part">
+          <span class="type-title">單題／多題建議<span class="mark">已選</span></span>
+          <span class="type-desc">只看幾題，給修改建議</span></label>
+        <label class="type"><input type="radio" name="kind" value="wish">
+          <span class="type-title">許願出題<span class="mark">已選</span></span>
+          <span class="type-desc">描述需求，請 AI 幫忙出題</span></label>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 id="step2">2. 考卷資料</h2>
+      <div id="meta-fields">
+        <div class="grid">
+          <label class="field">評量別<select id="f-exam"></select></label>
+          <label class="field">年級<select id="f-grade"></select></label>
+          <label class="field">科目<select id="f-subject"></select></label>
+        </div>
+        <label class="field">你的姓名<input type="text" id="f-teacher" maxlength="20" autocomplete="name"></label>
+      </div>
+
+      <div id="file-fields">
+        <label class="field">考卷檔案（必填）<small>Word 或 PDF</small>
+          <input type="file" id="f-main" accept=".doc,.docx,.odt,.pdf"></label>
+        <label class="field">PDF 版（建議附）<small>有 PDF 才看得到實際排版、注音和算式</small>
+          <input type="file" id="f-pdf" accept=".pdf"></label>
+        <label class="field">答案（建議附）<small>有答案才能檢查答案對不對</small>
+          <input type="file" id="f-answer" accept=".doc,.docx,.odt,.pdf"></label>
+      </div>
+      <label class="field" id="wish-field" hidden>想要什麼樣的題目？
+        <textarea id="f-wish" rows="4" maxlength="5000" placeholder="例如：第三單元分數應用題 5 題，難度中等，附答案"></textarea></label>
+
+      <div class="preview">檔名：<strong id="preview-name"></strong></div>
+    </div>
+
+    <div id="eta-box" class="note n-info"></div>
+    <div id="up-error" class="note n-err" hidden role="alert"></div>
+
+    <div class="actions">
+      <span class="hint">考卷屬保密資料，只有你自己看得到。完成後會寄信通知你。</span>
+      <button type="button" class="btn btn-big" id="btn-submit">送出審題</button>
+    </div>
+  </section>
+
+  <!-- 查看建議 -->
+  <section id="view-detail" hidden>
+    <button type="button" class="link" id="btn-back">← 回到我的考卷</button>
+    <h1 id="d-title" style="overflow-wrap:anywhere"></h1>
+    <p class="hint" id="d-meta"></p>
+    <div id="d-redo" class="note n-warn" hidden>這是上一次的建議。修改版正在重新審題，完成後會更新。</div>
+    <div class="card" style="padding:12px">
+      <iframe id="d-frame" class="doc-frame" sandbox="allow-same-origin" title="審題建議內容"></iframe>
+    </div>
+    <div class="actions" style="justify-content:flex-start">
+      <button type="button" class="btn btn-ghost" id="btn-download">下載建議檔（Word）</button>
+      <button type="button" class="btn" id="btn-redo">上傳修改版重審</button>
+    </div>
+  </section>
+</main>
+
+<script>
+  var S = { init: null, items: [], replace: null, current: null };
+  var $ = function (id) { return document.getElementById(id); };
+
+  function call(fn) {
+    var args = Array.prototype.slice.call(arguments, 1);
+    return new Promise(function (resolve, reject) {
+      var r = google.script.run.withSuccessHandler(resolve).withFailureHandler(function (e) { reject(e); });
+      r[fn].apply(r, args);
+    });
+  }
+  function errText(e) { return (e && e.message ? e.message : String(e)).replace(/^Exception:\s*/, ''); }
+
+  // ---- 時間（一律台北時間） ----
+  var TZ = 8 * 3600000;
+  function pad(n) { return String(n).padStart(2, '0'); }
+  function stamp(ms) {
+    var d = new Date(ms + TZ);
+    return (d.getUTCMonth() + 1) + '/' + d.getUTCDate() + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes());
+  }
+
+  // 依排程推算下一次審題：考試日 9:03–15:03 每小時，平日（週一到五，含考試日）16:03
+  // 排程日期改了，這份清單也要跟著改
+  var EXAM_DAYS = ['2026-10-07','2026-10-08','2026-10-12','2026-10-13','2026-10-15','2026-10-16','2026-10-19','2026-10-20','2026-10-21','2026-10-22','2026-10-23','2026-10-27','2026-10-28','2026-10-29','2026-10-30','2026-11-02','2026-11-03','2026-11-04','2026-12-16','2026-12-17','2026-12-18','2026-12-21','2026-12-22','2027-03-17','2027-03-18','2027-03-19','2027-03-22','2027-03-23','2027-05-10','2027-05-11','2027-05-12','2027-05-13','2027-05-14','2027-05-19','2027-05-20','2027-05-21','2027-05-24','2027-05-25'];
+  function nextReview() {
+    var now = Date.now(), wk = ['日','一','二','三','四','五','六'];
+    var todayKey = new Date(now + TZ).toISOString().slice(0, 10);
+    var tomorrowKey = new Date(now + TZ + 86400000).toISOString().slice(0, 10);
+    for (var i = 0; i < 21; i++) {
+      var day = new Date(now + TZ + i * 86400000);
+      var key = day.toISOString().slice(0, 10), dow = day.getUTCDay(), hours = [];
+      if (EXAM_DAYS.indexOf(key) >= 0) for (var h = 9; h <= 15; h++) hours.push(h);
+      if (dow >= 1 && dow <= 5 && key >= '2026-10-06' && key <= '2027-06-30') hours.push(16);
+      for (var j = 0; j < hours.length; j++) {
+        var run = Date.parse(key + 'T' + pad(hours[j]) + ':03:00+08:00');
+        if (run <= now) continue;
+        var done = run + 15 * 60000, d = new Date(done + TZ);
+        var label = key === todayKey ? '今天' : key === tomorrowKey ? '明天' : (d.getUTCMonth() + 1) + '/' + d.getUTCDate() + '（' + wk[dow] + '）';
+        var mins = Math.max(1, Math.round((done - now) / 60000)), left;
+        if (mins < 60) left = mins + ' 分鐘';
+        else if (mins < 1440) left = Math.floor(mins / 60) + ' 小時' + (mins % 60 ? ' ' + (mins % 60) + ' 分' : '');
+        else left = Math.floor(mins / 1440) + ' 天' + (Math.floor((mins % 1440) / 60) ? ' ' + Math.floor((mins % 1440) / 60) + ' 小時' : '');
+        return { at: label + ' ' + pad(d.getUTCHours()) + ':' + pad(d.getUTCMinutes()), left: left };
+      }
+    }
+    return null;
+  }
+
+  // ---- 畫面切換 ----
+  function show(view) {
+    ['list', 'upload', 'detail'].forEach(function (v) { $('view-' + v).hidden = v !== view; });
+    $('tab-list').setAttribute('aria-current', view === 'upload' ? 'false' : 'page');
+    $('tab-upload').setAttribute('aria-current', view === 'upload' ? 'page' : 'false');
+    window.scrollTo(0, 0);
+  }
+  function flash(text, kind) {
+    var m = $('global-msg');
+    m.textContent = text; m.className = 'note ' + (kind || 'n-ok'); m.hidden = !text;
+  }
+
+  // ---- 我的考卷 ----
+  var BADGE = { done: ['已完成', 'b-done'], queue: ['排隊中', 'b-queue'], redo: ['修改後重審中', 'b-redo'] };
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function renderList() {
+    var box = $('list'); box.innerHTML = '';
+    if (!S.items.length) { box.appendChild(el('div', 'empty', '還沒有上傳過考卷。按上方「上傳考卷」開始。')); return; }
+    var eta = nextReview();
+    S.items.forEach(function (it) {
+      var row = el('div', 'item');
+      var main = el('div', 'item-main');
+      main.appendChild(el('div', 'item-name', it.base));
+      main.appendChild(el('div', 'hint', it.kindLabel + '　·　上傳 ' + stamp(it.uploadedAt)));
+      row.appendChild(main);
+      row.appendChild(el('span', 'badge ' + BADGE[it.status][1], BADGE[it.status][0]));
+      var side = el('div', 'item-side');
+      if (it.status === 'done') {
+        var b = el('button', 'btn', '查看建議'); b.type = 'button';
+        b.onclick = function () { openDetail(it); };
+        side.appendChild(b);
+      } else {
+        if (eta) { side.appendChild(el('span', 'eta-left', '還要約 ' + eta.left)); side.appendChild(el('span', 'eta-at', '預計 ' + eta.at + ' 前完成')); }
+        else side.appendChild(el('span', 'hint', '目前不在審題期間'));
+        if (it.status === 'redo') {
+          var p = el('button', 'btn btn-ghost', '查看上次建議'); p.type = 'button';
+          p.onclick = function () { openDetail(it); };
+          side.appendChild(p);
+        }
+      }
+      row.appendChild(side);
+      box.appendChild(row);
+    });
+  }
+  function loadList() {
+    return call('getMyItems').then(function (items) { S.items = items; renderList(); })
+      .catch(function (e) { $('list').innerHTML = ''; $('list').appendChild(el('div', 'empty', '讀取失敗：' + errText(e))); });
+  }
+
+  // ---- 上傳 ----
+  function kind() { return S.replace ? S.replace.kind : document.querySelector('input[name=kind]:checked').value; }
+  function fill(sel, list) { list.forEach(function (v) { var o = el('option', null, v); o.value = v; sel.appendChild(o); }); }
+
+  function previewName() {
+    if (S.replace) return S.replace.base;
+    var t = $('f-teacher').value.replace(/[\\/:*?"<>|_\s]/g, '') || '（姓名）';
+    return [$('f-exam').value, $('f-grade').value, $('f-subject').value, t].join('_') + (kind() === 'wish' ? '_許願' : '');
+  }
+  function refreshForm() {
+    var wish = kind() === 'wish';
+    $('file-fields').hidden = wish;
+    $('wish-field').hidden = !wish;
+    $('preview-name').textContent = previewName();
+    var eta = nextReview();
+    $('eta-box').textContent = eta ? '現在送出，預計 ' + eta.at + ' 前完成（還要約 ' + eta.left + '）'
+      : '目前不在審題期間（排程到 2027/6/30），送出後要等下次排程開始才會審題。';
+  }
+  function resetForm() {
+    ['f-main', 'f-pdf', 'f-answer'].forEach(function (id) { $(id).value = ''; });
+    $('f-wish').value = '';
+    $('up-error').hidden = true;
+  }
+  function openUpload(replaceItem) {
+    S.replace = replaceItem || null;
+    resetForm();
+    $('type-card').hidden = !!S.replace;
+    $('meta-fields').hidden = !!S.replace;
+    $('redo-note').hidden = !S.replace;
+    $('up-title').textContent = S.replace ? '上傳修改版' : '上傳考卷';
+    $('step2').textContent = S.replace ? '修改後的檔案' : '2. 考卷資料';
+    if (S.replace) $('redo-note').textContent = '修改版會沿用原檔名「' + S.replace.base + '」，送出後取代舊檔並重新審題。';
+    refreshForm();
+    show('upload');
+  }
+
+  function readFile(input, role) {
+    var f = input.files[0];
+    if (!f) return Promise.resolve(null);
+    if (f.size > S.init.maxFileMB * 1024 * 1024) return Promise.reject(new Error('「' + f.name + '」超過 ' + S.init.maxFileMB + ' MB。'));
+    return new Promise(function (resolve, reject) {
+      var r = new FileReader();
+      r.onload = function () { resolve({ role: role, name: f.name, data: String(r.result).split(',')[1] }); };
+      r.onerror = function () { reject(new Error('讀不到「' + f.name + '」。')); };
+      r.readAsDataURL(f);
+    });
+  }
+
+  function submit() {
+    var err = $('up-error'); err.hidden = true;
+    var k = kind();
+    if (k === 'wish' && !$('f-wish').value.trim()) { err.textContent = '請先寫下你想要什麼樣的題目。'; err.hidden = false; return; }
+    if (k !== 'wish' && !$('f-main').files[0]) { err.textContent = '請先選擇要上傳的考卷檔案。'; err.hidden = false; return; }
+    if (!S.replace && !$('f-teacher').value.trim()) { err.textContent = '請填寫你的姓名。'; err.hidden = false; return; }
+
+    var btn = $('btn-submit'); btn.disabled = true; btn.textContent = '上傳中…';
+    var files = k === 'wish' ? Promise.resolve([])
+      : Promise.all([readFile($('f-main'), 'main'), readFile($('f-pdf'), 'pdf'), readFile($('f-answer'), 'answer')]);
+    files.then(function (list) {
+      try { localStorage.setItem('teacherName', $('f-teacher').value.trim()); } catch (e) {}
+      return call('upload', {
+        kind: k, exam: $('f-exam').value, grade: $('f-grade').value, subject: $('f-subject').value,
+        teacher: $('f-teacher').value, wish: $('f-wish').value,
+        replaceBase: S.replace ? S.replace.base : null,
+        files: list.filter(Boolean)
+      });
+    }).then(function (res) {
+      flash(k === 'wish' ? '已收到你的出題需求「' + res.base + '」，排隊處理中。完成後會寄信通知你。'
+        : '已收到「' + res.base + '」，排隊審題中。完成後會寄信通知你。');
+      S.replace = null;
+      show('list');
+      return loadList();
+    }).catch(function (e) {
+      err.textContent = '上傳失敗：' + errText(e); err.hidden = false;
+    }).then(function () { btn.disabled = false; btn.textContent = '送出審題'; });
+  }
+
+  // ---- 查看建議 ----
+  function openDetail(it) {
+    S.current = it;
+    flash('');
+    $('d-title').textContent = it.base;
+    $('d-meta').textContent = it.kindLabel + (it.reviewedAt ? '　·　審閱時間 ' + stamp(it.reviewedAt) : '');
+    $('d-redo').hidden = it.status !== 'redo';
+    $('btn-redo').hidden = it.status !== 'done';
+    var frame = $('d-frame');
+    frame.srcdoc = '<p style="font-family:sans-serif;color:#4B5563">讀取建議中…</p>';
+    show('detail');
+    call('getSuggestion', it.kind, it.base).then(function (res) {
+      frame.onload = function () {
+        try { frame.style.height = (frame.contentDocument.documentElement.scrollHeight + 24) + 'px'; } catch (e) {}
+      };
+      frame.srcdoc = res.html.replace(/<script[\s\S]*?<\/script>/gi, '');
+    }).catch(function (e) {
+      frame.srcdoc = '<p style="font-family:sans-serif;color:#991B1B">讀取失敗：' + errText(e).replace(/</g, '&lt;') + '</p>';
+    });
+  }
+  function download() {
+    var it = S.current, btn = $('btn-download');
+    btn.disabled = true; btn.textContent = '準備中…';
+    call('downloadSuggestion', it.kind, it.base).then(function (res) {
+      var bin = atob(res.data), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([bytes], { type: res.mime }));
+      a.download = res.name;
+      document.body.appendChild(a); a.click(); a.remove();
+    }).catch(function (e) { alert('下載失敗：' + errText(e)); })
+      .then(function () { btn.disabled = false; btn.textContent = '下載建議檔（Word）'; });
+  }
+
+  // ---- 啟動 ----
+  $('tab-list').onclick = function () { flash(''); show('list'); loadList(); };
+  $('tab-upload').onclick = function () { flash(''); openUpload(null); };
+  $('btn-back').onclick = function () { show('list'); };
+  $('btn-redo').onclick = function () { openUpload(S.current); };
+  $('btn-download').onclick = download;
+  $('btn-submit').onclick = submit;
+  document.querySelectorAll('input[name=kind]').forEach(function (r) { r.onchange = refreshForm; });
+  ['f-exam', 'f-grade', 'f-subject', 'f-teacher'].forEach(function (id) { $(id).addEventListener('input', refreshForm); });
+  setInterval(function () { if (!$('view-list').hidden) renderList(); else if (!$('view-upload').hidden) refreshForm(); }, 30000);
+
+  call('getInit').then(function (init) {
+    S.init = init;
+    $('who').textContent = init.email;
+    fill($('f-exam'), init.exams); fill($('f-grade'), init.grades); fill($('f-subject'), init.subjects);
+    try { $('f-teacher').value = localStorage.getItem('teacherName') || ''; } catch (e) {}
+    return loadList();
+  }).catch(function (e) {
+    $('list').innerHTML = '';
+    $('list').appendChild(el('div', 'empty', errText(e)));
+  });
+</script>
+</body>
+</html>
